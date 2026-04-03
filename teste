@@ -1439,12 +1439,70 @@ function redzlib:MakeWindow(Configs)
 	end;LoadFile()
 	
 	local UISizeX, UISizeY = unpack(redzlib.Save.UISize)
-	local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
-		Size = UDim2.fromOffset(UISizeX, UISizeY),
-		Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2),
-		BackgroundTransparency = 0.03,
-		Name = "Hub"
-	}), "Main")
+		local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
+			Size = UDim2.fromOffset(UISizeX, UISizeY),
+			Position = UDim2.new(0.5, -UISizeX/2, 0.5, -UISizeY/2),
+			BackgroundTransparency = 0.2, -- Aumentado para ficar um pouco transparente
+			Name = "Hub"
+		}), "Main")
+
+		-- Efeito de Chuva de Bolinhas
+		task.spawn(function()
+			local RainContainer = Create("Frame", MainFrame, {
+				Size = UDim2.new(0.6, 0, 1, 0), -- Parte do meio do menu
+				Position = UDim2.new(0.5, 0, 0, 0),
+				AnchorPoint = Vector2.new(0.5, 0),
+				BackgroundTransparency = 1,
+				ClipsDescendants = true,
+				ZIndex = 0
+			})
+			
+			local Colors = {
+				Color3.fromRGB(0, 0, 139), -- Azul Escuro
+				Color3.fromRGB(0, 0, 0),   -- Preto
+				Color3.fromRGB(255, 255, 255) -- Branco (para o brilho)
+			}
+			
+			while task.wait(0.15) do
+				if not MainFrame or not MainFrame.Parent then break end
+				
+				task.spawn(function()
+					local StartPos = UDim2.new(math.random(), 0, -0.1, 0)
+					local EndPos = UDim2.new(StartPos.X.Scale, 0, 1.1, 0)
+					local ParticleColor = Colors[math.random(1, #Colors)]
+					
+						local Particle = Create("Frame", RainContainer, {
+							Size = UDim2.fromOffset(4, 4),
+							Position = StartPos,
+							BackgroundColor3 = ParticleColor,
+							BorderSizePixel = 0,
+							ZIndex = 0
+						}, {
+							Create("UICorner", {CornerRadius = UDim.new(1, 0)})
+						})
+					
+					-- Animação de cair
+					local FallTime = math.random(20, 40) / 10
+					CreateTween({Particle, "Position", EndPos, FallTime})
+					
+					-- Animação de piscar para branco
+					task.spawn(function()
+						while Particle and Particle.Parent do
+							task.wait(math.random(3, 8) / 10)
+							if not Particle or not Particle.Parent then break end
+							local OriginalColor = Particle.BackgroundColor3
+							CreateTween({Particle, "BackgroundColor3", Color3.new(1,1,1), 0.2})
+							task.wait(0.2)
+							if not Particle or not Particle.Parent then break end
+							CreateTween({Particle, "BackgroundColor3", OriginalColor, 0.2})
+						end
+					end)
+					
+					task.wait(FallTime)
+					Particle:Destroy()
+				end)
+			end
+		end)
 	Make("Gradient", MainFrame, {
 		Rotation = 45
 	})MakeDrag(MainFrame)
