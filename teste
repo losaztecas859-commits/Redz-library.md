@@ -1472,7 +1472,7 @@ function redzlib:MakeWindow(Configs)
 					local ParticleColor = Colors[math.random(1, #Colors)]
 					
 						local Particle = Create("Frame", RainContainer, {
-							Size = UDim2.fromOffset(4, 4),
+							Size = UDim2.fromOffset(7, 7),
 							Position = StartPos,
 							BackgroundColor3 = ParticleColor,
 							BorderSizePixel = 0,
